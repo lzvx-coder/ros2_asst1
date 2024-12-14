@@ -44,10 +44,17 @@ public:
 class ROS_EVENT_LOOP
 {
 public:
-    ROS_EVENT_LOOP(int argc, char *argv[],std::string st)
+    ROS_EVENT_LOOP(int argc, char *argv[])
     {
         rclcpp::init(argc, argv);
-        rclcpp::spin(std::make_shared<node>(st));
+        int turtleNum=argc-1;
+        rclcpp::executors::MultiThreadedExecutor executor;
+        for(int i=1;i<=turtleNum;i++){
+            std::string turtleName=argv[i];
+            auto node_=std::make_shared<node>(turtleName);
+            executor.add_node(node_);
+        }
+        executor.spin();
     }
     ~ROS_EVENT_LOOP()
     {
@@ -57,11 +64,11 @@ public:
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2 )
+    if (argc <2 )
     {
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "usage: tf turtle_name");
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "usage: tf turtle_name please more");
         return 1;
     }
-    ROS_EVENT_LOOP(argc, argv, argv[1]);
+    ROS_EVENT_LOOP(argc, argv);
     return 0;
 }
